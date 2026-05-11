@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HealthTech PR Program Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f2; color: #2c2c2a; min-height: 100vh; }
+
+  .app { max-width: 900px; margin: 0 auto; background: #fff; min-height: 100vh; box-shadow: 0 0 40px rgba(0,0,0,0.08); }
+
+  /* Header */
+  .header { background: #04342c; padding: 1.25rem 1.5rem 0; }
+  .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+  .logo-dot { width: 10px; height: 10px; background: #1D9E75; border-radius: 50%; }
+  .brand { font-size: 12px; font-weight: 600; color: #9FE1CB; letter-spacing: 0.08em; text-transform: uppercase; }
+  .tabs { display: flex; gap: 0; overflow-x: auto; }
+  .tab { padding: 10px 18px; font-size: 13px; cursor: pointer; border: none; background: none; color: #9FE1CB; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; font-family: inherit; }
+  .tab:hover { color: #fff; }
+  .tab.active { color: #fff; border-bottom-color: #1D9E75; font-weight: 600; }
+
+  /* Content */
+  .content { padding: 1.5rem; }
+  .tab-content { display: none; }
+  .tab-content.visible { display: block; }
+
+  /* Section headings */
+  .section-title { font-size: 15px; font-weight: 600; margin-bottom: 1rem; color: #2c2c2a; }
+  .section-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .section-row .section-title { margin-bottom: 0; }
+
+  /* Metric cards */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .metric { background: #f5f5f2; border-radius: 8px; padding: 0.9rem 1rem; }
+  .metric-label { font-size: 11px; color: #888780; margin-bottom: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+  .metric-value { font-size: 24px; font-weight: 600; }
+  .metric-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+
+  /* Colors */
+  .teal { color: #1D9E75; }
+  .amber { color: #BA7517; }
+  .red { color: #E24B4A; }
+
+  /* Cards */
+  .card { background: #fff; border: 1px solid #e8e8e4; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+
+  /* Badges */
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 6px; font-weight: 600; white-space: nowrap; display: inline-block; }
+  .badge-green  { background: #E1F5EE; color: #085041; }
+  .badge-amber  { background: #FAEEDA; color: #854F0B; }
+  .badge-red    { background: #FCEBEB; color: #A32D2D; }
+  .badge-blue   { background: #E6F1FB; color: #185FA5; }
+  .badge-gray   { background: #f5f5f2; color: #888780; }
+
+  /* Onboarding checklist */
+  .check-group-title { font-size: 11px; font-weight: 700; color: #888780; letter-spacing: 0.06em; text-transform: uppercase; padding: 1rem 0 0.4rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid #f0eeea; }
+  .check-item:last-child { border-bottom: none; }
+  .checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid #c8c6be; cursor: pointer; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: #fff; }
+  .checkbox.done { background: #1D9E75; border-color: #1D9E75; }
+  .checkbox.done::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+  .check-label { font-size: 14px; line-height: 1.45; }
+  .check-label.done { color: #b4b2a9; text-decoration: line-through; }
+
+  /* Forms */
+  .input-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .input-row input, .input-row select {
+    flex: 1; min-width: 110px; font-size: 13px; padding: 7px 10px;
+    border: 1px solid #d3d1c7; border-radius: 7px;
+    background: #fff; color: #2c2c2a; font-family: inherit;
+    outline: none; transition: border 0.15s;
+  }
+  .input-row input:focus, .input-row select:focus { border-color: #1D9E75; }
+  .input-row button {
+    font-size: 13px; padding: 7px 14px; border-radius: 7px;
+    border: 1px solid #d3d1c7; background: #fff; cursor: pointer;
+    color: #2c2c2a; font-family: inherit; transition: background 0.15s;
+  }
+  .input-row button:hover { background: #f5f5f2; }
+
+  /* Campaign rows */
+  .campaign-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .campaign-name { font-size: 14px; font-weight: 600; flex: 1; min-width: 100px; }
+  .campaign-desc { font-size: 12px; color: #888780; width: 100%; margin-top: 3px; }
+  .del-btn { font-size: 11px; padding: 3px 9px; border-radius: 6px; border: 1px solid #e8e8e4; background: none; cursor: pointer; color: #b4b2a9; font-family: inherit; }
+  .del-btn:hover { background: #f5f5f2; color: #2c2c2a; }
+
+  /* Coverage */
+  .coverage-outlet { font-size: 14px; font-weight: 600; }
+  .coverage-headline { font-size: 12px; color: #888780; margin-top: 2px; }
+  .coverage-date { font-size: 11px; color: #b4b2a9; }
+
+  /* Contacts */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .contact-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .contact-name { font-size: 14px; font-weight: 600; }
+  .contact-role { font-size: 12px; color: #888780; }
+  .contact-email { font-size: 12px; color: #185FA5; margin-top: 2px; }
+  .card-row { display: flex; align-items: center; gap: 10px; }
+
+  /* KPIs */
+  .kpi-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .kpi-name { font-size: 13px; min-width: 180px; }
+  .kpi-row input[type=number] { width: 72px; font-size: 13px; padding: 5px 8px; border: 1px solid #d3d1c7; border-radius: 7px; background: #fff; color: #2c2c2a; font-family: inherit; outline: none; }
+  .kpi-row input[type=number]:focus { border-color: #1D9E75; }
+  .kpi-row label { font-size: 12px; color: #888780; }
+  .progress-bar { height: 5px; background: #f0eeea; border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #1D9E75; border-radius: 3px; transition: width 0.3s; }
+  .save-btn { font-size: 13px; padding: 7px 18px; border-radius: 7px; border: 1px solid #1D9E75; background: none; cursor: pointer; color: #1D9E75; font-weight: 600; font-family: inherit; margin-top: 8px; }
+  .save-btn:hover { background: #E1F5EE; }
+
+  /* Dashboard grid */
+  .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .empty { font-size: 13px; color: #b4b2a9; padding: 1.25rem 0; text-align: center; }
+  .notice { font-size: 12px; color: #888780; margin-top: 6px; }
+
+  /* Divider */
+  hr.divider { border: none; border-top: 1px solid #f0eeea; margin: 1rem 0; }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="header-top">
+      <div class="logo-dot"></div>
+      <span class="brand">PR Program Tracker</span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="tab" onclick="switchTab('onboarding')">Onboarding</button>
+      <button class="tab" onclick="switchTab('campaigns')">Campaigns</button>
+      <button class="tab" onclick="switchTab('coverage')">Coverage</button>
+      <button class="tab" onclick="switchTab('contacts')">Contacts</button>
+      <button class="tab" onclick="switchTab('kpis')">KPIs</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="tab-content visible">
+      <div class="metrics" id="dash-metrics"></div>
+      <div class="dash-grid">
+        <div>
+          <p class="section-title">Recent coverage</p>
+          <div id="dash-coverage"></div>
+        </div>
+        <div>
+          <p class="section-title">Active campaigns</p>
+          <div id="dash-campaigns"></div>
+        </div>
+      </div>
+      <div style="margin-top:1.25rem;">
+        <p class="section-title">Onboarding progress</p>
+        <div id="dash-onboarding"></div>
+      </div>
+    </div>
+
+    <!-- ONBOARDING -->
+    <div id="tab-onboarding" class="tab-content">
+      <div class="section-row">
+        <p class="section-title">First 90 days setup checklist</p>
+        <span id="onboard-pct" class="badge badge-gray">0% complete</span>
+      </div>
+      <div id="onboard-list"></div>
+    </div>
+
+    <!-- CAMPAIGNS -->
+    <div id="tab-campaigns" class="tab-content">
+      <p class="section-title">Active campaigns</p>
+      <div class="input-row">
+        <input id="camp-name" placeholder="Campaign name" />
+        <input id="camp-desc" placeholder="Goal or description" />
+        <select id="camp-status">
+          <option value="planning">Planning</option>
+          <option value="active">Active</option>
+          <option value="on hold">On hold</option>
+          <option value="complete">Complete</option>
+        </select>
+        <input id="camp-due" type="date" />
+        <button onclick="addCampaign()">+ Add</button>
+      </div>
+      <div id="campaign-list"></div>
+    </div>
+
+    <!-- COVERAGE -->
+    <div id="tab-coverage" class="tab-content">
+      <p class="section-title">Media coverage log</p>
+      <div class="input-row">
+        <input id="cov-outlet" placeholder="Outlet (e.g. STAT News)" />
+        <input id="cov-headline" placeholder="Headline or topic" />
+        <select id="cov-type">
+          <option value="feature">Feature</option>
+          <option value="mention">Mention</option>
+          <option value="interview">Interview</option>
+          <option value="podcast">Podcast</option>
+          <option value="op-ed">Op-ed</option>
+        </select>
+        <select id="cov-sentiment">
+          <option value="positive">Positive</option>
+          <option value="neutral">Neutral</option>
+          <option value="negative">Negative</option>
+        </select>
+        <input id="cov-date" type="date" />
+        <button onclick="addCoverage()">+ Log</button>
+      </div>
+      <div id="coverage-list"></div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div id="tab-contacts" class="tab-content">
+      <p class="section-title">Key contacts directory</p>
+      <div class="input-row">
+        <input id="con-name" placeholder="Full name" />
+        <input id="con-role" placeholder="Role / title" />
+        <input id="con-email" placeholder="Email" />
+        <select id="con-org">
+          <option value="PR Firm">PR Firm</option>
+          <option value="Internal">Internal team</option>
+          <option value="Media">Media contact</option>
+          <option value="Analyst">Analyst / KOL</option>
+        </select>
+        <button onclick="addContact()">+ Add</button>
+      </div>
+      <div id="contact-list"></div>
+    </div>
+
+    <!-- KPIs -->
+    <div id="tab-kpis" class="tab-content">
+      <p class="section-title">Goals & KPIs</p>
+      <div id="kpi-list"></div>
+      <button class="save-btn" onclick="saveKPIs()">Save KPIs</button>
+      <p class="notice">Set annual targets. Update actuals as results come in.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const AVATARS      = ['#9FE1CB','#B5D4F4','#FAC775','#F4C0D1','#C0DD97'];
+const AVATAR_TEXT  = ['#085041','#0C447C','#633806','#72243E','#27500A'];
+const STORAGE_KEY  = 'pr_tracker_standalone_v1';
+
+let state = {
+  onboarding: [
+    { group:'Week 1 — Kickoff',          text:'Send signed contract and retainer to PR firm', done:false },
+    { group:'Week 1 — Kickoff',          text:'Schedule kickoff call with firm account team', done:false },
+    { group:'Week 1 — Kickoff',          text:'Share company one-pager, deck, and product overview', done:false },
+    { group:'Week 1 — Kickoff',          text:'Identify internal PR point-of-contact', done:false },
+    { group:'Weeks 2–3 — Foundations',   text:'Complete firm messaging intake questionnaire', done:false },
+    { group:'Weeks 2–3 — Foundations',   text:'Review and approve firm\'s messaging framework draft', done:false },
+    { group:'Weeks 2–3 — Foundations',   text:'Confirm approved spokespeople and media training needs', done:false },
+    { group:'Weeks 2–3 — Foundations',   text:'Provide list of priority media outlets and journalists', done:false },
+    { group:'Weeks 2–3 — Foundations',   text:'Build shared editorial calendar (Google Sheets or Notion)', done:false },
+    { group:'Month 1 — Assets',          text:'Approve boilerplate company description', done:false },
+    { group:'Month 1 — Assets',          text:'Sign off on press kit (bio, headshots, logo pack)', done:false },
+    { group:'Month 1 — Assets',          text:'Establish press release approval workflow and turnaround SLA', done:false },
+    { group:'Month 1 — Assets',          text:'Set up shared Slack or Teams channel with firm', done:false },
+    { group:'Month 1 — Assets',          text:'Confirm embargo and NDA protocols', done:false },
+    { group:'Months 2–3 — Go Live',      text:'Complete media training for primary spokesperson', done:false },
+    { group:'Months 2–3 — Go Live',      text:'Pitch and secure first proactive press placement', done:false },
+    { group:'Months 2–3 — Go Live',      text:'Review 30-day report from PR firm', done:false },
+    { group:'Months 2–3 — Go Live',      text:'Hold 90-day strategy review and reset KPIs', done:false },
+  ],
+  campaigns: [],
+  coverage:  [],
+  contacts:  [],
+  kpis: [
+    { name:'Total press placements',    target:24, actual:0 },
+    { name:'Tier-1 media placements',   target:6,  actual:0 },
+    { name:'Share of voice (%)',         target:15, actual:0 },
+    { name:'Podcast appearances',        target:4,  actual:0 },
+    { name:'Speaking engagements',       target:3,  actual:0 },
+    { name:'Press releases issued',      target:8,  actual:0 },
+  ]
+};
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = Object.assign({}, state, JSON.parse(saved));
+  } catch(e) {}
+  render();
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function switchTab(name) {
+  const names = ['dashboard','onboarding','campaigns','coverage','contacts','kpis'];
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', names[i] === name));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('visible'));
+  document.getElementById('tab-' + name).classList.add('visible');
+  if (name === 'dashboard') renderDashboard();
+}
+
+function render() {
+  renderOnboarding();
+  renderCampaigns();
+  renderCoverage();
+  renderContacts();
+  renderKPIs();
+  renderDashboard();
+}
+
+/* ── ONBOARDING ── */
+function renderOnboarding() {
+  const done = state.onboarding.filter(i => i.done).length;
+  const total = state.onboarding.length;
+  const pct = Math.round(done / total * 100);
+  const pctEl = document.getElementById('onboard-pct');
+  pctEl.textContent = pct + '% complete';
+  pctEl.className = 'badge ' + (pct === 100 ? 'badge-green' : pct > 50 ? 'badge-amber' : 'badge-gray');
+
+  const groups = [...new Set(state.onboarding.map(i => i.group))];
+  document.getElementById('onboard-list').innerHTML = groups.map(g => {
+    const items = state.onboarding.filter(i => i.group === g);
+    return `<p class="check-group-title">${g}</p>
+      <div class="card" style="padding:0.25rem 1rem;">
+        ${items.map(item => {
+          const idx = state.onboarding.indexOf(item);
+          return `<div class="check-item">
+            <div class="checkbox ${item.done ? 'done' : ''}" onclick="toggleCheck(${idx})" tabindex="0" role="checkbox" aria-checked="${item.done}"></div>
+            <div class="check-label ${item.done ? 'done' : ''}">${item.text}</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+  }).join('');
+}
+
+function toggleCheck(idx) {
+  state.onboarding[idx].done = !state.onboarding[idx].done;
+  save(); renderOnboarding(); renderDashboard();
+}
+
+/* ── CAMPAIGNS ── */
+function statusBadge(s) {
+  const map = { planning:'badge-blue', active:'badge-green', 'on hold':'badge-amber', complete:'badge-gray' };
+  return `<span class="badge ${map[s] || 'badge-gray'}">${s}</span>`;
+}
+
+function renderCampaigns() {
+  const el = document.getElementById('campaign-list');
+  if (!state.campaigns.length) { el.innerHTML = '<div class="empty">No campaigns yet. Add one above.</div>'; return; }
+  el.innerHTML = state.campaigns.map((c, i) => `
+    <div class="card">
+      <div class="campaign-row">
+        <span class="campaign-name">${c.name}</span>
+        ${statusBadge(c.status)}
+        ${c.due ? `<span class="badge badge-gray">📅 ${c.due}</span>` : ''}
+        <button class="del-btn" onclick="delCampaign(${i})">Remove</button>
+      </div>
+      ${c.desc ? `<div class="campaign-desc">${c.desc}</div>` : ''}
+    </div>`).join('');
+}
+
+function addCampaign() {
+  const name = document.getElementById('camp-name').value.trim();
+  if (!name) return;
+  state.campaigns.push({
+    name,
+    desc:   document.getElementById('camp-desc').value.trim(),
+    status: document.getElementById('camp-status').value,
+    due:    document.getElementById('camp-due').value
+  });
+  ['camp-name','camp-desc','camp-due'].forEach(id => document.getElementById(id).value = '');
+  save(); renderCampaigns(); renderDashboard();
+}
+
+function delCampaign(i) { state.campaigns.splice(i, 1); save(); renderCampaigns(); renderDashboard(); }
+
+/* ── COVERAGE ── */
+function sentimentBadge(s) {
+  if (s === 'positive') return '<span class="badge badge-green">positive</span>';
+  if (s === 'negative') return '<span class="badge badge-red">negative</span>';
+  return '<span class="badge badge-gray">neutral</span>';
+}
+
+function renderCoverage() {
+  const el = document.getElementById('coverage-list');
+  if (!state.coverage.length) { el.innerHTML = '<div class="empty">No coverage logged yet.</div>'; return; }
+  el.innerHTML = [...state.coverage].reverse().map((c, ri) => {
+    const i = state.coverage.length - 1 - ri;
+    return `<div class="card">
+      <div class="card-row">
+        <div style="flex:1">
+          <div class="coverage-outlet">${c.outlet} <span class="badge badge-blue" style="font-size:10px;">${c.type}</span></div>
+          <div class="coverage-headline">${c.headline}</div>
+          <div class="coverage-date">${c.date || ''}</div>
+        </div>
+        ${sentimentBadge(c.sentiment)}
+        <button class="del-btn" onclick="delCoverage(${i})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function addCoverage() {
+  const outlet = document.getElementById('cov-outlet').value.trim();
+  if (!outlet) return;
+  state.coverage.push({
+    outlet,
+    headline:  document.getElementById('cov-headline').value.trim(),
+    type:      document.getElementById('cov-type').value,
+    sentiment: document.getElementById('cov-sentiment').value,
+    date:      document.getElementById('cov-date').value
+  });
+  ['cov-outlet','cov-headline','cov-date'].forEach(id => document.getElementById(id).value = '');
+  save(); renderCoverage(); renderDashboard();
+}
+
+function delCoverage(i) { state.coverage.splice(i, 1); save(); renderCoverage(); renderDashboard(); }
+
+/* ── CONTACTS ── */
+function initials(name) { return name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
+
+function renderContacts() {
+  const el = document.getElementById('contact-list');
+  if (!state.contacts.length) { el.innerHTML = '<div class="empty">No contacts added yet.</div>'; return; }
+  const orgBadge = o => {
+    if (o === 'PR Firm')  return '<span class="badge badge-green">PR Firm</span>';
+    if (o === 'Internal') return '<span class="badge badge-blue">Internal</span>';
+    if (o === 'Media')    return '<span class="badge badge-amber">Media</span>';
+    return '<span class="badge badge-gray">Analyst / KOL</span>';
+  };
+  el.innerHTML = `<div class="two-col">` +
+    state.contacts.map((c, i) => {
+      const ai = i % AVATARS.length;
+      return `<div class="card card-row">
+        <div class="contact-avatar" style="background:${AVATARS[ai]};color:${AVATAR_TEXT[ai]}">${initials(c.name)}</div>
+        <div style="flex:1">
+          <div class="contact-name">${c.name} ${orgBadge(c.org)}</div>
+          <div class="contact-role">${c.role}</div>
+          ${c.email ? `<div class="contact-email">${c.email}</div>` : ''}
+        </div>
+        <button class="del-btn" onclick="delContact(${i})">Remove</button>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
+function addContact() {
+  const name = document.getElementById('con-name').value.trim();
+  if (!name) return;
+  state.contacts.push({
+    name,
+    role:  document.getElementById('con-role').value.trim(),
+    email: document.getElementById('con-email').value.trim(),
+    org:   document.getElementById('con-org').value
+  });
+  ['con-name','con-role','con-email'].forEach(id => document.getElementById(id).value = '');
+  save(); renderContacts();
+}
+
+function delContact(i) { state.contacts.splice(i, 1); save(); renderContacts(); }
+
+/* ── KPIs ── */
+function renderKPIs() {
+  document.getElementById('kpi-list').innerHTML = state.kpis.map((k, i) => {
+    const pct = k.target > 0 ? Math.min(100, Math.round(k.actual / k.target * 100)) : 0;
+    return `<div style="margin-bottom:1.1rem;">
+      <div class="kpi-row">
+        <span class="kpi-name">${k.name}</span>
+        <label>Target:</label>
+        <input type="number" value="${k.target}" min="0" step="1" onchange="state.kpis[${i}].target=parseInt(this.value)||0;renderDashboard();" />
+        <label>Actual:</label>
+        <input type="number" value="${k.actual}" min="0" step="1" onchange="state.kpis[${i}].actual=parseInt(this.value)||0;renderDashboard();" />
+        <span style="font-size:13px;font-weight:600;min-width:36px;${pct>=100?'color:#1D9E75':''}">${pct}%</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+}
+
+function saveKPIs() {
+  save();
+  const b = document.querySelector('.save-btn');
+  b.textContent = 'Saved ✓';
+  setTimeout(() => b.textContent = 'Save KPIs', 2000);
+}
+
+/* ── DASHBOARD ── */
+function renderDashboard() {
+  const done   = state.onboarding.filter(i => i.done).length;
+  const total  = state.onboarding.length;
+  const pos    = state.coverage.filter(c => c.sentiment === 'positive').length;
+  const active = state.campaigns.filter(c => c.status === 'active').length;
+  const avgKpi = state.kpis.length
+    ? Math.round(state.kpis.reduce((a, k) => a + (k.target > 0 ? k.actual / k.target : 0), 0) / state.kpis.length * 100)
+    : 0;
+
+  document.getElementById('dash-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Onboarding</div><div class="metric-value teal">${Math.round(done/total*100)}%</div><div class="metric-sub">${done}/${total} tasks done</div></div>
+    <div class="metric"><div class="metric-label">Active campaigns</div><div class="metric-value">${active}</div><div class="metric-sub">${state.campaigns.length} total</div></div>
+    <div class="metric"><div class="metric-label">Media placements</div><div class="metric-value">${state.coverage.length}</div><div class="metric-sub">${pos} positive</div></div>
+    <div class="metric"><div class="metric-label">KPI progress</div><div class="metric-value ${avgKpi>=75?'teal':avgKpi>=40?'amber':'red'}">${avgKpi}%</div><div class="metric-sub">avg across goals</div></div>`;
+
+  const recentCov = [...state.coverage].slice(-3).reverse();
+  document.getElementById('dash-coverage').innerHTML = recentCov.length
+    ? recentCov.map(c => `<div class="card" style="margin-bottom:8px;"><div class="coverage-outlet">${c.outlet} ${sentimentBadge(c.sentiment)}</div><div class="coverage-headline">${c.headline || '—'}</div></div>`).join('')
+    : '<div class="empty">No coverage yet.</div>';
+
+  const recentCamp = state.campaigns.filter(c => c.status === 'active').slice(0, 3);
+  document.getElementById('dash-campaigns').innerHTML = recentCamp.length
+    ? recentCamp.map(c => `<div class="card" style="margin-bottom:8px;"><div class="campaign-row"><span class="campaign-name">${c.name}</span>${statusBadge(c.status)}</div>${c.desc?`<div class="campaign-desc">${c.desc}</div>`:''}</div>`).join('')
+    : '<div class="empty">No active campaigns.</div>';
+
+  const pct = Math.round(done / total * 100);
+  document.getElementById('dash-onboarding').innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:13px;">${done} of ${total} setup tasks completed</span>
+        <span class="badge ${pct===100?'badge-green':pct>50?'badge-amber':'badge-gray'}">${pct}%</span>
+      </div>
+      <div class="progress-bar" style="height:7px;"><div class="progress-fill" style="width:${pct}%"></div></div>
+      ${pct < 100
+        ? `<div style="font-size:12px;color:#888780;margin-top:6px;">Next: ${state.onboarding.find(i => !i.done)?.text || ''}</div>`
+        : '<div style="font-size:12px;color:#1D9E75;margin-top:6px;">All onboarding tasks complete 🎉</div>'}
+    </div>`;
+}
+
+loadState();
+</script>
+</body>
+</html>
